@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="鈴鹿情報共有">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>OGW 情報共有カウントダウン — 2026 SF R11-12 SUZUKA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#FFFFFF; --panel:#F6F8FA; --panel2:#FBFCFD; --line:#E3E7EC;
+  --txt:#1B1F26; --dim:#8A93A0; --dim2:#59616C;
+  --signal:#E08A00; --flag:#B08E00; --run:#E23B26;
+  --map:#2E7FD6; --check:#12997A; --media:#7458C4; --admin:#9AA3AE;
+  --hot:#E53224;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Yu Gothic UI','Yu Gothic','Meiryo',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; height:100vh; overflow:hidden;
+}
+.mono{font-family:'Chakra Petch','Consolas',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+
+/* ═══ 上段：固定 ═══ */
+.top{
+  flex:0 0 auto; padding:14px 20px 16px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#F1F4F8 0%,var(--bg) 100%);
+  box-shadow:0 4px 14px rgba(16,24,40,.08); z-index:10;
+}
+.topwrap{max-width:1180px;margin:0 auto;}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
+.eyebrow{font-size:10px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;}
+.title{font-size:17px;font-weight:700;letter-spacing:.02em;margin-top:3px;}
+.title em{font-style:normal;color:var(--signal);}
+.clockbox{text-align:right;}
+.clocknum{font-size:22px;font-weight:600;letter-spacing:.04em;line-height:1;}
+.clocknum small{color:var(--dim);font-size:1em;}
+.clockday{font-size:10px;letter-spacing:.18em;color:var(--dim);margin-top:5px;}
+
+.cd{background:var(--panel);border:1px solid var(--line);border-radius:3px;position:relative;overflow:hidden;
+    display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;}
+.cd::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--signal);z-index:2;}
+.cd.hot::before{background:var(--hot);}
+.cd.live::before{background:var(--check);}
+.cd.done::before{background:var(--admin);}
+.cdleft{padding:16px 0 16px 24px;min-width:0;}
+.cdlabel{font-size:11px;letter-spacing:.2em;color:var(--dim2);text-transform:uppercase;}
+.cdwhen{font-size:14px;font-weight:700;margin-top:6px;letter-spacing:.03em;min-height:18px;}
+.cdwhen .dow{color:var(--signal);margin-right:8px;}
+.cd.hot .cdwhen .dow{color:var(--hot);}
+.cdtask{font-size:12px;color:var(--dim2);margin-top:8px;}
+.cdright{padding:10px 24px 10px 0;text-align:right;}
+.big{font-size:clamp(46px,8.5vw,88px);font-weight:700;line-height:.9;letter-spacing:-.02em;white-space:nowrap;}
+.big .u{font-size:.28em;color:var(--dim);margin:0 5px;letter-spacing:.1em;}
+.cd.warn .big{color:var(--signal);}
+.cd.hot .big{color:var(--hot);animation:pulse 1s steps(2,end) infinite;}
+.cd.flash{animation:flash .5s ease-out 3;}
+@keyframes pulse{50%{opacity:.35}}
+@keyframes flash{0%{background:var(--signal);}100%{background:var(--panel);}}
+.gapbar{grid-column:1/-1;height:2px;background:var(--line);position:relative;}
+.gapfill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--signal);transition:width .25s linear;}
+.cd.hot .gapfill{background:var(--hot);}
+.cd.live .gapfill{background:var(--check);}
+
+/* ═══ 下段：スクロール ═══ */
+.bottom{flex:1 1 auto; overflow-y:auto; padding:20px; scrollbar-width:thin; scrollbar-color:var(--line) transparent;}
+.bottom::-webkit-scrollbar{width:10px;}
+.bottom::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--bg);}
+.bottom::-webkit-scrollbar-track{background:transparent;}
+.botwrap{max-width:1180px;margin:0 auto;padding-bottom:24px;}
+
+.sec{margin-bottom:26px;}
+.sec:last-child{margin-bottom:0;}
+.sechd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.sectitle{font-size:11px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;}
+.secnote{font-size:11px;color:var(--dim);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+.trace{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:14px 14px 6px;}
+.lane{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:center;margin-bottom:9px;}
+.lanekey{font-size:10px;letter-spacing:.1em;color:var(--dim);line-height:1.35;}
+.lanekey b{display:block;color:var(--txt);font-size:12px;letter-spacing:.06em;}
+.lane.on .lanekey b{color:var(--signal);}
+.track{position:relative;height:26px;background:#EDF0F4;border:1px solid #DCE1E7;border-radius:2px;overflow:hidden;}
+.bar{position:absolute;height:5px;border-radius:1px;}
+.tick{position:absolute;top:0;bottom:0;width:2px;opacity:.75;}
+.brief{position:absolute;top:2px;bottom:2px;min-width:3px;background:var(--signal);border-radius:1px;box-shadow:0 0 7px rgba(255,179,0,.65);}
+.brief.past{background:#E0CF95;box-shadow:none;}
+.head{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--txt);z-index:5;display:none;}
+.head::after{content:"";position:absolute;top:-2px;left:-3px;width:7px;height:4px;background:var(--txt);clip-path:polygon(0 0,100% 0,50% 100%);}
+.axis{display:grid;grid-template-columns:76px 1fr;gap:10px;margin-top:2px;}
+.axisrow{position:relative;height:16px;}
+.axislab{position:absolute;font-size:9px;color:var(--dim);transform:translateX(-50%);letter-spacing:.06em;}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+.lg{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--dim);}
+.lgc{width:9px;height:3px;border-radius:1px;}
+
+.list{border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+.row{display:grid;grid-template-columns:72px 96px 1fr auto;gap:12px;align-items:center;
+     padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel2);border-left:2px solid transparent;}
+.row:last-child{border-bottom:none;}
+.row.next{background:#FFF2D4;border-left-color:var(--signal);}
+.row.now{background:#E3F5EF;border-left-color:var(--check);}
+.row.past{opacity:.4;}
+.rday{font-size:11px;letter-spacing:.12em;color:var(--dim2);}
+.rtime{font-size:15px;font-weight:600;letter-spacing:.03em;}
+.rtask{font-size:12px;color:var(--dim2);}
+.rst{font-size:9px;letter-spacing:.14em;padding:3px 8px;border-radius:2px;white-space:nowrap;background:#E9ECF0;color:var(--dim2);}
+.rst.p{color:var(--dim);}
+.rst.n{background:var(--signal);color:#0D1014;font-weight:700;}
+.rst.c{background:var(--check);color:#04120E;font-weight:700;}
+
+.allbox{border:1px solid var(--line);border-radius:3px;max-height:56vh;overflow-y:auto;position:relative;
+        scrollbar-width:thin;scrollbar-color:var(--line) transparent;}
+.allbox::-webkit-scrollbar{width:9px;}
+.allbox::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--panel2);}
+.allbox::-webkit-scrollbar-track{background:transparent;}
+.allbox.following{scroll-behavior:smooth;}
+.all{overflow:hidden;}
+.arow{display:grid;grid-template-columns:82px 1fr auto;gap:12px;align-items:center;
+      padding:8px 14px;border-bottom:1px solid var(--line);background:var(--panel2);border-left:2px solid transparent;font-size:12px;}
+.arow:last-child{border-bottom:none;}
+.arow.past{opacity:.35;}
+.arow.now{background:#E3F5EF;border-left-color:var(--check);}
+.arow.br{opacity:.6;font-style:italic;}
+.arow.brief-row{background:#FFF4DD;}
+.arow.snd .atask::after{content:"🔔";font-size:10px;margin-left:7px;opacity:.8;}
+.atime{color:var(--dim2);letter-spacing:.03em;}
+.atask{color:var(--txt);}
+.arow.brief-row .atask{color:var(--signal);font-weight:700;}
+.akind{width:8px;height:8px;border-radius:2px;}
+.dayhdr{padding:9px 14px;background:#EDF0F4;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;
+        color:var(--signal);font-weight:700;position:sticky;top:0;z-index:3;}
+.dayhdr span{color:var(--dim);font-weight:400;margin-left:10px;letter-spacing:.05em;}
+
+.themes{border:1px solid var(--line);border-radius:3px;padding:14px 16px;background:var(--panel2);}
+.themes h3{color:var(--signal);letter-spacing:.14em;font-size:10px;font-weight:700;margin-bottom:6px;}
+.themes p{font-size:11px;color:var(--dim2);line-height:1.65;}
+
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px;
+     padding:12px 14px;border:1px solid var(--line);border-radius:3px;background:var(--panel2);}
+.btn{background:transparent;border:1px solid var(--line);color:var(--dim2);border-radius:2px;
+     padding:7px 13px;font-size:10px;letter-spacing:.14em;cursor:pointer;font-family:inherit;}
+.btn:hover{border-color:var(--dim);color:var(--txt);}
+.btn.on{border-color:var(--signal);color:var(--signal);}
+.btn.test{border-color:var(--check);color:var(--check);}
+.btn.test:hover{background:rgba(47,169,140,.12);}
+.btn.danger{border-color:#E3B0AB;color:#C0392B;}
+.btn.danger:hover{background:rgba(232,64,42,.1);border-color:var(--run);color:var(--run);}
+.btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+.slider{flex:1;min-width:180px;accent-color:var(--signal);display:none;}
+.hint{font-size:10px;color:var(--dim);letter-spacing:.05em;}
+.audiobadge{font-size:10px;letter-spacing:.08em;padding:3px 8px;border-radius:2px;background:#E9ECF0;color:var(--dim);}
+.audiobadge.ok{color:var(--check);}
+.audiobadge.warn{color:var(--signal);}
+.savebadge{font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:2px;background:#E9ECF0;color:var(--dim);opacity:0;transition:opacity .3s;}
+.savebadge.show{opacity:1;color:var(--check);}
+
+/* ── 音設定パネル ── */
+#soundSec{border:1px solid var(--check);border-radius:3px;padding:14px 16px;background:#EBF8F4;}
+.sndrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.sndrow>label{font-size:11px;letter-spacing:.1em;color:var(--dim2);}
+.sndrow select{width:auto;min-width:170px;}
+.sndnote{font-size:11px;color:var(--dim2);line-height:1.7;margin:4px 0 12px;}
+.sndnote b{color:var(--check);}
+.sndchecks{display:flex;flex-wrap:wrap;gap:9px 12px;padding-top:12px;border-top:1px solid var(--line);}
+.sndchk{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt);cursor:pointer;
+  border:1px solid var(--line);border-radius:4px;padding:8px 12px;user-select:none;background:#EDF0F4;}
+.sndchk:hover{border-color:var(--dim);}
+.sndchk.on{border-color:var(--check);background:rgba(47,169,140,.08);}
+.sndchk input{width:17px;height:17px;accent-color:var(--check);cursor:pointer;flex:0 0 auto;}
+.sndchk .swatch{width:11px;height:11px;border-radius:2px;flex:0 0 auto;}
+
+/* ── 編集パネル ── */
+#editorSec{border:1px solid var(--signal);border-radius:3px;padding:14px 16px;background:#FFFBEF;}
+.editmeta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.editmeta label{font-size:10px;letter-spacing:.1em;color:var(--dim);display:block;margin-bottom:4px;}
+.editwrap{max-height:52vh;overflow-y:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel2);}
+.edday{padding:10px 12px;background:#EDF0F4;border-bottom:1px solid var(--line);border-top:1px solid var(--line);
+       display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:2;}
+.edday .dlabel{font-size:11px;letter-spacing:.12em;color:var(--signal);font-weight:700;min-width:46px;}
+.edrow{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;
+       padding:11px 12px;border-bottom:1px solid var(--line);}
+.edrow:last-child{border-bottom:none;}
+.edrow.isbrief{background:#FFF4DD;}
+.edfield{display:flex;flex-direction:column;gap:3px;}
+.edfield>span{font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;}
+.edfield.f-start,.edfield.f-end{width:98px;}
+.edfield.f-task{flex:1 1 200px;min-width:150px;}
+.edfield.f-kind{width:148px;}
+input,select{font-family:inherit;background:#EDF0F4;border:1px solid var(--line);color:var(--txt);
+             border-radius:2px;padding:6px 7px;font-size:12px;width:100%;}
+input[type=time]{font-family:'Chakra Petch',monospace;}
+input:focus,select:focus{outline:none;border-color:var(--signal);}
+select{appearance:none;-webkit-appearance:none;-moz-appearance:none;cursor:pointer;padding-right:26px;
+  border-color:#C7CED6;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23FFB300' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;}
+select:hover{border-color:var(--signal);}
+.edfield.f-kind>span{color:var(--signal);}
+.edrow .del{background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:2px;
+            cursor:pointer;height:32px;width:32px;font-size:13px;line-height:1;align-self:flex-end;}
+.edrow .del:hover{border-color:var(--run);color:var(--run);}
+.edadd{display:block;margin:8px 12px 12px;background:transparent;border:1px dashed var(--line);color:var(--dim2);
+       border-radius:2px;padding:7px;font-size:11px;letter-spacing:.08em;cursor:pointer;font-family:inherit;width:calc(100% - 24px);}
+.edadd:hover{border-color:var(--signal);color:var(--signal);}
+textarea{font-family:inherit;background:#EDF0F4;border:1px solid var(--line);color:var(--txt);border-radius:2px;padding:8px;font-size:12px;width:100%;}
+textarea:focus{outline:none;border-color:var(--signal);}
+.edaddday{display:block;width:100%;margin:12px 0 4px;background:transparent;border:1px dashed var(--signal);color:var(--signal);
+       border-radius:3px;padding:10px;font-size:12px;letter-spacing:.1em;cursor:pointer;font-family:inherit;}
+.edaddday:hover{background:rgba(255,179,0,.08);}
+.edday .deldy{margin-left:auto;background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:2px;
+       cursor:pointer;padding:5px 10px;font-size:10px;letter-spacing:.06em;}
+.edday .deldy:hover{border-color:var(--run);color:var(--run);}
+.edhelp{font-size:10px;color:var(--dim);line-height:1.7;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+.edhelp b{color:var(--dim2);}
+
+@media (max-width:680px){
+  .cd{grid-template-columns:1fr;}
+  .cdright{padding:0 24px 14px;text-align:left;}
+  .cdleft{padding-bottom:6px;}
+  .row{grid-template-columns:60px 1fr auto;}
+  .rtask{grid-column:1/-1;grid-row:2;}
+  .lane,.axis{grid-template-columns:56px 1fr;}
+  .arow{grid-template-columns:70px 1fr auto;}
+  .editmeta{grid-template-columns:1fr;}
+  .edfield.f-task{flex:1 1 100%;}
+}
+@media (prefers-reduced-motion:reduce){
+  .cd.hot .big,.cd.flash{animation:none;}
+  .gapfill{transition:none;}
+}
+.sflogo{height:34px;width:auto;display:block;margin-bottom:12px;}
+
+/* ── ログイン ── */
+#loginOverlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+.loginCard{width:100%;max-width:360px;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:30px 24px;}
+.loginCard .lg-ic{width:54px;height:54px;display:block;margin:0 auto 14px;}
+.loginCard h1{font-size:15px;letter-spacing:.08em;margin-bottom:4px;text-align:center;font-weight:700;}
+.loginCard h1 em{font-style:normal;color:var(--signal);}
+.loginCard .sub{font-size:11px;color:var(--dim);letter-spacing:.1em;margin-bottom:22px;text-align:center;}
+.loginCard label{display:block;font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin:14px 0 6px;}
+.loginCard input{width:100%;padding:13px 12px;font-size:16px;border:1px solid var(--line);background:#FFFFFF;border-radius:4px;color:var(--txt);font-family:inherit;}
+.loginCard input:focus{outline:none;border-color:var(--signal);}
+.loginBtn{width:100%;margin-top:22px;padding:14px;font-size:14px;letter-spacing:.14em;border:1px solid var(--signal);
+  background:var(--signal);color:#0D1014;font-weight:700;border-radius:4px;cursor:pointer;font-family:inherit;}
+.loginBtn:active{opacity:.85;}
+.loginErr{color:var(--hot);font-size:12px;margin-top:14px;min-height:16px;text-align:center;}
+.loginNote{font-size:10px;color:var(--dim);margin-top:18px;line-height:1.7;text-align:center;}
+
+/* ── モバイル最適化 ── */
+@media (max-width:680px){
+  .top{padding:10px 12px 12px;}
+  .bottom{padding:12px;}
+  .botwrap{padding-bottom:30px;}
+  .ctl{gap:7px;padding:10px;}
+  .btn{padding:10px 12px;font-size:11px;}
+  .hd{margin-bottom:8px;}
+  .title{font-size:15px;}
+  .clocknum{font-size:19px;}
+  .big{font-size:clamp(40px,15vw,74px);}
+  .cdleft{padding:14px 0 14px 18px;}
+  .sndchk{padding:10px 13px;font-size:13px;}
+  .sndchk input{width:19px;height:19px;}
+  .allbox{max-height:62vh;}
+}
+
+</style>
+</head>
+<body>
+<!-- ログイン（関係者のみ） -->
+<div id="loginOverlay" style="display:flex;">
+  <div class="loginCard">
+    <img class="lg-ic" src="icon-192.png" alt="">
+    <h1>OGW <em>情報共有</em> タイマー</h1>
+    <div class="sub">2026 SF R11-12 SUZUKA</div>
+    <label>ログインID</label>
+    <input id="loginId" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+    <label>パスワード</label>
+    <input id="loginPass" type="password" autocomplete="current-password">
+    <button class="loginBtn" id="loginBtn">ログイン</button>
+    <div class="loginErr" id="loginErr"></div>
+    <div class="loginNote">関係者のみ利用できます。<br>一度ログインすると、この端末では次回から省略されます。</div>
+  </div>
+</div>
+
+<!-- スケジュールデータ（編集で書き換わる領域。目印は script#data タグ自体） -->
+<script id="data" type="application/json">
+{
+  "id": "SF-R11-12-SUZUKA",
+  "builtAt": "2026-11-18T00:00:00",
+  "title": "2026 SF R11-12 SUZUKA",
+  "subtitle": "2026 Super Formula · Round 11-12 · Suzuka Circuit",
+  "theme": [
+    "コースオフ、トラブル発生時は速やかに無線報告して情報共有しましょう。",
+    "ドライバー無線でエンジン不調のコメントがあった場合は、データー確認でトラブルの早期発見に努めましょう。",
+    "AMのMap説明は走行1時間前とし、走行までに余裕を持てるようにしましょう。",
+    "PMのMap説明は走行30分前とし、インターバルでの情報共有を強化しましょう。",
+    "OGW・TGR-D関係なく疑問に思った事や些細な事でも声掛けし、不具合を出さないサポートを心がけましょう。",
+    "情報共有の後、map配信までに10分間隔を設けます。※混乱防止。"
+  ],
+  "days": [
+    {"date": "2026-11-19", "key": "10:00 入り"},
+    {"date": "2026-11-20", "key": "8:20 出発"},
+    {"date": "2026-11-21", "key": "7:35 出発"},
+    {"date": "2026-11-22", "key": "7:00 出発"}
+  ],
+  "events": [
+    [0,"10:00",null,"OGW入り、設営","admin",0],
+    [0,"13:00",null,"TGR-D入り","admin",0],
+    [0,"12:20","18:00","SF任意測定(51番ピット)","run",1],
+    [0,"13:00","18:00","OGW作業(各Team Pit)","check",0],
+    [0,"14:00","15:00","Map認識合わせ(エンジニアのみ)","map",0],
+    [0,"15:00","18:00","Base Map update","map",0],
+    [0,"16:00","17:00","Map説明(各Team Pit)","map",0],
+    [0,"14:00","16:30","コース下見(自転車・徒歩のみ)","media",1],
+    [0,"18:00","18:30","情報共有(作業, Map, etc,,,)","brief",0],
+    [0,"18:30",null,"終了","admin",0],
+
+    [1,"8:55",null,"サーキット入り","admin",0],
+    [1,"9:05","9:20","情報共有(作業, Map, etc,,,)","brief",0],
+    [1,"9:30",null,"Map配布","map",0],
+    [1,"9:30","10:00","Map作成、送信, スペアECU","map",0],
+    [1,"9:40","10:10","Map説明(各Team Pit)","map",0],
+    [1,"10:25",null,"黄色SW連絡","flag",0],
+    [1,"10:40","11:45","SF専有1、SL","run",0],
+    [1,"11:50","12:05","コメント取り(担当チームのみ)","check",0],
+    [1,"11:50","12:45","データチェック, 点検","check",0],
+    [1,"11:50","12:45","Base Map update","map",0],
+    [1,"12:45","12:55","情報共有(作業, Map, etc,,,)","brief",0],
+    [1,"13:05",null,"Map配布","map",0],
+    [1,"13:05","13:35","各車Map作成, 送信","map",0],
+    [1,"13:45","14:00","Map説明(各Team Pit)","map",0],
+    [1,"14:00",null,"黄色SW連絡","flag",0],
+    [1,"14:15","15:05","SF専有2","run",0],
+    [1,"15:15","15:25","組分走行-A組","run",0],
+    [1,"15:30","15:40","組分走行-B組","run",0],
+    [1,"15:45","16:15","コメント取り(小さなチームで)","check",0],
+    [1,"15:45","18:30","データチェック, 点検","check",0],
+    [1,"15:45","18:30","Base Map update(ドラコメ共有)","map",0],
+    [1,"16:30","17:00","ドライバーブリーフィング(暖気禁止)","media",1],
+    [1,"17:00","17:30","メディアMIXゾーン","media",1],
+    [1,"18:30","19:00","情報共有(作業, Map, etc,,,)","brief",0],
+    [1,"19:00",null,"終了","admin",0],
+
+    [2,"8:05",null,"サーキット入り","admin",0],
+    [2,"8:15","8:30","情報共有(作業, Map, etc,,,)","brief",0],
+    [2,"8:40",null,"Map配布","map",0],
+    [2,"8:40","9:10","Map作成、送信, スペアECU","map",0],
+    [2,"8:50","9:20","Map説明(各Team Pit)","map",0],
+    [2,"9:35",null,"黄色SW連絡","flag",0],
+    [2,"9:50","10:35","QF(Q1-AB、Q2)","run",0],
+    [2,"10:40","10:55","コメント取り(担当チームのみ)","check",0],
+    [2,"10:40","12:10","データチェック, 点検","check",0],
+    [2,"10:40","12:10","Base Map update","map",0],
+    [2,"12:10","12:25","情報共有(作業, Map, etc,,,)","brief",0],
+    [2,"12:35",null,"Map配布","map",0],
+    [2,"12:35","13:05","各車Map作成, 送信","map",0],
+    [2,"13:00","13:15","Map説明(各Team Pit)","map",0],
+    [2,"13:15",null,"黄色SW連絡","flag",0],
+    [2,"13:30",null,"スタート進行","run",0],
+    [2,"14:25","15:40","Race1(R11) 31L/75min","run",0],
+    [2,"15:45","18:30","コメント取り(小さなチームで)","check",0],
+    [2,"15:45","18:30","データチェック, 点検","check",0],
+    [2,"15:45","18:30","Base Map update(ドラコメ共有)","map",0],
+    [2,"16:25","16:55","TOP3記者会見","media",1],
+    [2,"17:00","18:00","メディアMIXゾーン","media",1],
+    [2,"18:30","19:00","情報共有(作業, Map, etc,,,)","brief",0],
+    [2,"19:00",null,"終了","admin",0],
+
+    [3,"7:30",null,"サーキット入り","admin",0],
+    [3,"7:40","7:55","情報共有(作業, Map, etc,,,)","brief",0],
+    [3,"8:05",null,"Map配布","map",0],
+    [3,"8:05","8:35","Map作成、送信, スペアECU","map",0],
+    [3,"8:15","8:45","Map説明(各Team Pit)","map",0],
+    [3,"9:00",null,"黄色SW連絡","flag",0],
+    [3,"9:15","10:00","QF(Q1-AB、Q2)","run",0],
+    [3,"10:05","10:20","コメント取り(担当チームのみ)","check",0],
+    [3,"10:05","11:35","データチェック, 点検","check",0],
+    [3,"10:05","11:35","Base Map update","map",0],
+    [3,"11:35","11:50","情報共有(作業, Map, etc,,,)","brief",0],
+    [3,"12:00",null,"Map配布","map",0],
+    [3,"12:00","12:30","各車Map作成, 送信","map",0],
+    [3,"12:25","12:40","Map説明(各Team Pit)","map",0],
+    [3,"12:40",null,"黄色SW連絡","flag",0],
+    [3,"12:55",null,"スタート進行","run",0],
+    [3,"13:50","15:05","Race2(R12) 31L/75min","run",0],
+    [3,"15:15","17:00","コメント取り(小さなチームで)","check",0],
+    [3,"15:15","17:00","データーチェック、サーバーへアップ","check",0],
+    [3,"16:25","16:50","TOP3記者会見","media",1],
+    [3,"16:55","17:20","シリーズ記者会見","media",1],
+    [3,"17:00","18:00","片付け","admin",0],
+    [3,"17:25","18:25","メディアMIXゾーン","media",1],
+    [3,"18:00","18:10","終礼","admin",0],
+    [3,"18:10",null,"終了","admin",0]
+  ]
+}
+</script>
+
+<!-- ═══ 上段：常時表示 ═══ -->
+<div class="top">
+  <div class="topwrap">
+    <img class="sflogo" src="data:image/png;base64,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" alt="SUPER FORMULA">
+    <div class="hd">
+      <div>
+        <div class="eyebrow" id="subtitle">—</div>
+        <div class="title">OGW <em>情報共有</em> カウントダウン</div>
+      </div>
+      <div class="clockbox">
+        <div class="clocknum mono" id="clock">--:--<small>:--</small></div>
+        <div class="clockday mono" id="clockday">—</div>
+      </div>
+    </div>
+    <div class="cd" id="cd">
+      <div class="cdleft">
+        <div class="cdlabel" id="cdlabel">—</div>
+        <div class="cdwhen mono" id="cdwhen"></div>
+        <div class="cdtask" id="cdtask"></div>
+      </div>
+      <div class="cdright"><div class="big mono" id="big">--:--:--</div></div>
+      <div class="gapbar"><div class="gapfill" id="gapfill"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 下段：スクロール ═══ -->
+<div class="bottom">
+  <div class="botwrap">
+
+    <div class="ctl">
+      <button class="btn" id="btnSound">アラート音 OFF</button>
+      <button class="btn" id="btnSndCfg">🔊 音設定</button>
+      <button class="btn test" id="btnTest">♪ アラーム音テスト</button>
+      <span class="audiobadge" id="audioBadge">音声：未準備</span>
+      <button class="btn" id="btnSim">時刻シミュレーション OFF</button>
+      <button class="btn" id="btnEdit">✎ 編集</button>
+      <button class="btn" id="btnWake">📱 画面ON維持 OFF</button>
+      <button class="btn" id="btnLogout">ログアウト</button>
+      <input class="slider" type="range" id="slider" aria-label="時刻スクラブ">
+      <span class="hint" id="hint">音ON時：チェックした種別の 5分前・1分前・開始 に鳴ります（音設定で変更）</span>
+    </div>
+
+    <!-- 音設定パネル -->
+    <div class="sec" id="soundSec" style="display:none;">
+      <div class="sechd"><div class="sectitle">アラーム音の設定</div></div>
+      <div class="sndrow">
+        <label>アラーム音</label>
+        <select id="sndSel"></select>
+        <button class="btn test" id="btnSndTest">▶ 試聴</button>
+      </div>
+      <div class="sndnote">
+        下で<b>チェックを入れた種別</b>について、各予定の <b>5分前・1分前・開始</b> にアラーム音が鳴ります（上部「アラート音 ON」が必要）。<br>
+        情報共有だけでなく、走行・黄色SW連絡・スタート進行など、鳴らしたい種別を自由に選べます。
+      </div>
+      <div class="sndchecks" id="sndChecks"></div>
+    </div>
+
+    <!-- 編集パネル -->
+    <div class="sec" id="editorSec" style="display:none;">
+      <div class="sechd">
+        <div class="sectitle">スケジュール編集</div>
+        <div class="secnote">
+          <span class="savebadge" id="saveBadge">この端末に保存しました</span>
+          <button class="btn test" id="btnExport">変更をHTMLとして保存</button>
+          <button class="btn danger" id="btnReset">初期スケジュールに戻す</button>
+        </div>
+      </div>
+      <div class="editmeta">
+        <div><label>大会名（上部の見出し）</label><input id="edSubtitle" type="text"></div>
+        <div><label>タイトル（保存ファイル名に使用）</label><input id="edTitle" type="text"></div>
+      </div>
+      <div style="margin-bottom:14px;"><label style="font-size:10px;letter-spacing:.1em;color:var(--dim);display:block;margin-bottom:4px;">テーマ（下部に表示・1行に1項目）</label><textarea id="edTheme" rows="5" style="resize:vertical;line-height:1.6;"></textarea></div>
+      <div class="editwrap" id="editwrap"></div>
+      <button class="edaddday" id="btnAddDay">＋ 日（開催日）を追加</button>
+      <div id="exportOK" style="display:none;margin-top:10px;padding:8px 12px;border:1px solid var(--check);border-radius:2px;background:rgba(47,169,140,.12);color:var(--check);font-size:11px;letter-spacing:.04em;"></div>
+      <div class="edhelp">
+        <b>別の大会で使い回す：</b>この編集パネルだけで、サーキットやラウンドが変わっても対応できます。<br>
+        ① 大会名・タイトル・テーマを書き換え　② 「＋ 日を追加」「日を削除」で開催日数を合わせる　③ 各日の日付・出発/入りを設定<br>
+        ④ 各予定の時刻・内容・種別を編集（「＋ 行を追加」で追加、✕で削除）　⑤「変更をHTMLとして保存」で新しいファイルを書き出し<br>
+        <b>保存：</b>修正は即この端末に自動保存。配布は「変更をHTMLとして保存」で焼き込んだHTML(UTF-8)をダウンロード→差し替え。<br>
+        終了を空欄にすると「時刻のみの予定」になります。各日ヘッダーの日付を変えると、その日の全予定がまとめて移動します。
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sechd">
+        <div class="sectitle">Event trace</div>
+        <div class="secnote mono" id="overall">全体進捗 0%</div>
+      </div>
+      <div class="trace">
+        <div id="lanes"></div>
+        <div class="axis"><div></div><div class="axisrow" id="axisrow"></div></div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sechd">
+        <div class="sectitle" id="briefTitle">情報共有</div>
+        <div class="secnote mono" id="donecount">0 / 0 完了</div>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sechd">
+        <div class="sectitle">全スケジュール</div>
+        <div class="secnote">
+          <span id="followHint" style="color:var(--dim);">現在時刻に自動追尾中</span>
+          <button class="btn" id="btnFollow" style="padding:4px 10px;">自動追尾 ON</button>
+        </div>
+      </div>
+      <div class="allbox" id="allbox"><div class="all" id="all"></div></div>
+    </div>
+
+    <div class="sec">
+      <div class="themes"><h3 id="themeTitle">テーマ</h3><div id="themeBody"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   起動直後に“素の”HTMLを退避（編集→HTML書き出しのテンプレート）
+   ============================================================ */
+var PRISTINE_HTML = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+function $(id){ return document.getElementById(id); }
+function pad(n){ return (n<10?"0":"")+n; }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function fmt(hm){ if(!hm) return ""; var p=hm.split(":"); return parseInt(p[0],10)+":"+p[1]; }
+function pad2(hm){ if(!hm) return ""; var p=hm.split(":"); return pad(parseInt(p[0],10))+":"+pad(parseInt(p[1]||"0",10)); }
+var DOW = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+function parseDate(s){ var p=s.split("-"); return {y:+p[0], mo:+p[1]-1, d:+p[2]}; }
+
+/* ── データ読み込み（localStorage優先、なければ焼き込みデータ）── */
+var BAKED = JSON.parse($("data").textContent);
+var LS_KEY = "ogwTimer::" + BAKED.id;
+var DATA;
+try{
+  var saved = localStorage.getItem(LS_KEY);
+  if(saved){ var s=JSON.parse(saved); if(s && s.builtAt===BAKED.builtAt && s.data) DATA = s.data; }
+}catch(e){}
+if(!DATA) DATA = clone(BAKED);
+
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({builtAt:BAKED.builtAt, data:DATA}));
+    var b=$("saveBadge"); b.classList.add("show");
+    clearTimeout(saveLocal._t); saveLocal._t=setTimeout(function(){ b.classList.remove("show"); },1500);
+  }catch(e){}
+}
+
+/* ── 派生データ ── */
+var DAYS, EVENTS, BRIEFINGS, EVENT_START, EVENT_END, AXIS_S, AXIS_E;
+
+var KIND = {
+  brief:{c:"var(--signal)",n:"情報共有"},
+  run:{c:"var(--run)",n:"走行 / Race"},
+  map:{c:"var(--map)",n:"Map 作業"},
+  check:{c:"var(--check)",n:"データ / 点検"},
+  flag:{c:"var(--flag)",n:"黄色SW連絡"},
+  media:{c:"var(--media)",n:"下見 / メディア"},
+  admin:{c:"var(--admin)",n:"入り / 終了"}
+};
+var LANEY = { run:3, map:10, check:16, media:21, admin:21 };
+
+function mkDate(di, hm){
+  var d=parseDate(DAYS[di].date), p=hm.split(":");
+  return new Date(d.y, d.mo, d.d, +p[0], +p[1], 0, 0);
+}
+function parseData(){
+  DAYS = DATA.days.map(function(x){
+    var d=parseDate(x.date);
+    return { date:x.date, key:x.key||"", dow:DOW[new Date(d.y,d.mo,d.d).getDay()], mo:d.mo, d:d.d };
+  });
+  DATA.events.sort(function(a,b){ if(a[0]!==b[0]) return a[0]-b[0]; return mkMin(a[1]) - mkMin(b[1]); });
+  EVENTS = DATA.events.map(function(r,i){
+    var st=mkDate(r[0],r[1]), en=r[2]?mkDate(r[0],r[2]):null;
+    return { id:i, di:r[0], start:st, end:en, endEff:(en||st),
+             sLabel:fmt(r[1]), eLabel:r[2]?fmt(r[2]):null, task:r[3], kind:r[4], bracket:!!r[5], raw:r };
+  });
+  BRIEFINGS = EVENTS.filter(function(e){ return e.kind==="brief"; });
+  var mn=Infinity, mx=-Infinity, amn=Infinity, amx=-Infinity;
+  EVENTS.forEach(function(e){
+    var st=e.start.getTime(); if(st<mn) mn=st;
+    var en=(e.end||e.start).getTime(); if(en>mx) mx=en;
+    var sm=e.start.getHours()*60+e.start.getMinutes(); if(sm<amn) amn=sm;
+    var em=(e.end||e.start); em=em.getHours()*60+em.getMinutes(); if(em>amx) amx=em;
+  });
+  if(mn===Infinity){ // 予定が0件（編集中に空の日だけ等）でも落ちないよう保険
+    var d0=parseDate(DAYS[0]?DAYS[0].date:"2026-01-01");
+    mn=new Date(d0.y,d0.mo,d0.d,9,0).getTime(); mx=new Date(d0.y,d0.mo,d0.d,18,0).getTime();
+    amn=9*60; amx=18*60;
+  }
+  EVENT_START = new Date(mn); EVENT_END = new Date(mx);
+  AXIS_S = Math.floor(amn/60)*60; AXIS_E = Math.ceil(amx/60)*60;
+  if(AXIS_E<=AXIS_S) AXIS_E = AXIS_S+60;
+}
+function mkMin(hm){ var p=hm.split(":"); return (+p[0])*60 + (+p[1]); }
+function axisPct(dt){ return ((dt.getHours()*60+dt.getMinutes()) - AXIS_S) / (AXIS_E-AXIS_S) * 100; }
+function dayLabel(day){ return day.dow+" "+(day.mo+1)+"/"+day.d; }
+
+/* ── ビュー構築 ── */
+var headEls, briefEls, rowEls, allEls;
+function buildViews(){
+  headEls={}; briefEls={}; rowEls={}; allEls={};
+  $("subtitle").textContent = DATA.subtitle || "";
+  $("briefTitle").textContent = "情報共有 全"+BRIEFINGS.length+"回";
+  document.title = (DATA.title||"OGW") + " 情報共有タイマー";
+
+  var lanes=$("lanes"); lanes.innerHTML="";
+  DAYS.forEach(function(day,di){
+    var lane=document.createElement("div");
+    lane.className="lane"; lane.id="lane"+di;
+    lane.innerHTML='<div class="lanekey mono"><b>'+dayLabel(day)+'</b>'+day.key+'</div>';
+    var track=document.createElement("div"); track.className="track";
+    EVENTS.filter(function(e){return e.di===di;}).forEach(function(e){
+      var x=axisPct(e.start), el=document.createElement("div");
+      if(e.kind==="brief"){
+        el.className="brief"; el.style.left=x+"%"; el.style.width=Math.max(axisPct(e.endEff)-x,0.5)+"%";
+        el.title=e.sLabel+(e.eLabel?"–"+e.eLabel:"")+" 情報共有"; briefEls[e.id]=el;
+      } else if(!e.end){
+        el.className="tick"; el.style.left=x+"%"; el.style.background=KIND[e.kind].c; el.title=e.sLabel+" "+e.task;
+      } else {
+        el.className="bar"; el.style.left=x+"%"; el.style.width=Math.max(axisPct(e.end)-x,0.4)+"%";
+        el.style.top=LANEY[e.kind]+"px"; el.style.background=KIND[e.kind].c;
+        el.style.opacity=e.bracket?0.28:0.55; el.title=e.sLabel+"–"+e.eLabel+" "+e.task;
+      }
+      track.appendChild(el);
+    });
+    var head=document.createElement("div"); head.className="head"; track.appendChild(head); headEls[di]=head;
+    lane.appendChild(track); lanes.appendChild(lane);
+  });
+
+  var ax=$("axisrow"); ax.innerHTML="";
+  for(var h=AXIS_S/60; h<=AXIS_E/60; h+=2){
+    var sp=document.createElement("span"); sp.className="axislab mono";
+    sp.style.left=((h*60-AXIS_S)/(AXIS_E-AXIS_S)*100)+"%"; sp.textContent=pad(h); ax.appendChild(sp);
+  }
+
+  var lg=$("legend"); lg.innerHTML="";
+  Object.keys(KIND).forEach(function(k){
+    var d=document.createElement("div"); d.className="lg";
+    d.innerHTML='<span class="lgc" style="background:'+KIND[k].c+'"></span>'+KIND[k].n; lg.appendChild(d);
+  });
+
+  var list=$("list"); list.innerHTML="";
+  BRIEFINGS.forEach(function(b){
+    var mins=Math.round((b.endEff-b.start)/60000);
+    var tlabel=b.eLabel?b.sLabel+"–"+b.eLabel:b.sLabel;
+    var row=document.createElement("div"); row.className="row";
+    row.innerHTML='<div class="rday mono">'+dayLabel(DAYS[b.di])+'</div>'+
+      '<div class="rtime mono">'+tlabel+'</div>'+
+      '<div class="rtask">'+mins+'min</div><div class="rst mono">予定</div>';
+    list.appendChild(row); rowEls[b.id]={row:row, st:row.querySelector(".rst")};
+  });
+  $("donecount").textContent="0 / "+BRIEFINGS.length+" 完了";
+
+  var all=$("all"); all.innerHTML="";
+  DAYS.forEach(function(day,di){
+    var hdr=document.createElement("div"); hdr.className="dayhdr";
+    hdr.innerHTML=dayLabel(day)+'<span>'+day.key+'</span>'; all.appendChild(hdr);
+    EVENTS.filter(function(e){return e.di===di;}).forEach(function(e){
+      var arow=document.createElement("div");
+      arow.className="arow"+(e.bracket?" br":"")+(e.kind==="brief"?" brief-row":"");
+      var tl=e.end?e.sLabel+"–"+e.eLabel:e.sLabel;
+      arow.innerHTML='<div class="atime mono">'+tl+'</div><div class="atask">'+e.task+
+        '</div><div class="akind" style="background:'+KIND[e.kind].c+'"></div>';
+      all.appendChild(arow); allEls[e.id]=arow;
+    });
+  });
+
+  var tb=$("themeBody"); tb.innerHTML="";
+  $("themeTitle").textContent=(DATA.title||"")+" のテーマ";
+  (DATA.theme||[]).forEach(function(t){ var p=document.createElement("p"); p.textContent="・"+t; tb.appendChild(p); });
+
+  markSoundRows();
+}
+function applyData(){ parseData(); buildViews(); fired={}; }
+
+/* ══════════ アラーム音（④ 複数音から選択） ══════════ */
+/* ブラウザはOSのシステム音には触れないため、内蔵の数種類を用意して選択・試聴できるようにする */
+var SOUNDS = [
+  {id:"beep",   name:"ビープ（標準）", wave:"square",   tiers:{"5m":[[660,120],[660,120]], "1m":[[880,120],[880,120],[880,120]], "go":[[1320,300]]}},
+  {id:"pippi",  name:"ピッピ（高音）", wave:"square",   tiers:{"5m":[[1000,90],[1000,90]], "1m":[[1200,80],[1200,80],[1200,80]], "go":[[1600,230],[2000,200]]}},
+  {id:"chime",  name:"チャイム",       wave:"sine",     tiers:{"5m":[[784,180],[659,230]], "1m":[[784,150],[659,150],[523,250]], "go":[[659,200],[784,200],[988,380]]}},
+  {id:"bell",   name:"ベル",           wave:"triangle", tiers:{"5m":[[1047,160],[1047,230]], "1m":[[1319,140],[1319,140],[1319,270]], "go":[[1568,440]]}},
+  {id:"buzzer", name:"ブザー（低音）", wave:"sawtooth", tiers:{"5m":[[220,200],[220,200]], "1m":[[196,160],[196,160],[196,160]], "go":[[147,520]]}},
+  {id:"marimba",name:"マリンバ",       wave:"sine",     tiers:{"5m":[[880,120],[1175,170]], "1m":[[880,110],[1175,110],[1397,200]], "go":[[1175,130],[1397,130],[1760,340]]}}
+];
+function sndById(id){ for(var i=0;i<SOUNDS.length;i++) if(SOUNDS[i].id===id) return SOUNDS[i]; return SOUNDS[0]; }
+
+/* ── 音設定（③ 種別チェック ＋ ④ 選択音）localStorageに保存 ── */
+var SND_KEY = LS_KEY + "::snd";
+var soundCfg = { soundId:"beep", kinds:{brief:true,run:false,map:false,check:false,flag:false,media:false,admin:false} };
+try{
+  var sr=localStorage.getItem(SND_KEY);
+  if(sr){ var so=JSON.parse(sr);
+    if(so){ if(so.soundId) soundCfg.soundId=so.soundId;
+            if(so.kinds){ for(var kk in soundCfg.kinds){ if(so.kinds.hasOwnProperty(kk)) soundCfg.kinds[kk]=!!so.kinds[kk]; } } } }
+}catch(e){}
+function saveSnd(){ try{ localStorage.setItem(SND_KEY, JSON.stringify(soundCfg)); }catch(e){} }
+
+var actx=null, audioReady=false;
+function initAudio(){
+  try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+       if(actx.state==="suspended") actx.resume(); audioReady=(actx.state==="running"); }
+  catch(e){ audioReady=false; }
+  updateAudioBadge();
+}
+function toneW(freq,dur,delay,wave){
+  if(!actx) return;
+  var start=function(){ try{
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.type=wave||"square"; o.frequency.value=freq;
+    var t0=actx.currentTime+(delay||0);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(0.25,t0+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0+dur+0.03);
+  }catch(e){} };
+  if(actx.state==="suspended"){ actx.resume().then(start).catch(start); } else start();
+}
+function playTier(soundId, tier){
+  var snd=sndById(soundId), notes=snd.tiers[tier]||snd.tiers.go, delay=0;
+  notes.forEach(function(nt){ toneW(nt[0], nt[1]/1000, delay, snd.wave); delay+=nt[1]/1000+0.07; });
+}
+function fireAlert(tier, label){
+  playTier(soundCfg.soundId, tier);
+  var cd=$("cd"); cd.classList.remove("flash"); void cd.offsetWidth; cd.classList.add("flash");
+  try{ if(navigator.vibrate) navigator.vibrate(tier==="go"?[200,80,200]:[120]); }catch(e){}
+  var msg = tier==="go" ? "▶ "+(label||"開始")+"！" : (tier==="5m"?"⏰ 5分前":"⏰ 1分前");
+  flashTitle(msg);
+}
+var titleTimer=null;
+function flashTitle(msg){
+  if(titleTimer) clearInterval(titleTimer);
+  var base=(DATA.title||"OGW")+" 情報共有タイマー", on=true, cnt=0;
+  titleTimer=setInterval(function(){ document.title=on?msg:base; on=!on; cnt++;
+    if(cnt>=10){ clearInterval(titleTimer); document.title=base; } },600);
+}
+function updateAudioBadge(){
+  var b=$("audioBadge");
+  if(!actx){ b.textContent="音声：未準備"; b.className="audiobadge"; return; }
+  if(actx.state==="running"){ b.textContent="音声：準備OK"; b.className="audiobadge ok"; }
+  else { b.textContent="音声：停止中(要タップ)"; b.className="audiobadge warn"; }
+}
+document.addEventListener("visibilitychange",function(){ if(!document.hidden&&actx) actx.resume().then(updateAudioBadge).catch(function(){}); });
+["click","keydown","touchstart"].forEach(function(ev){ window.addEventListener(ev,function once(){ initAudio(); window.removeEventListener(ev,once); },{once:true}); });
+
+/* 音設定パネル構築 */
+function buildSoundPanel(){
+  var sel=$("sndSel"); sel.innerHTML="";
+  SOUNDS.forEach(function(s){ var o=document.createElement("option"); o.value=s.id; o.textContent=s.name; if(s.id===soundCfg.soundId)o.selected=true; sel.appendChild(o); });
+  var box=$("sndChecks"); box.innerHTML="";
+  Object.keys(KIND).forEach(function(k){
+    var lab=document.createElement("label"); lab.className="sndchk"+(soundCfg.kinds[k]?" on":"");
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!soundCfg.kinds[k];
+    cb.addEventListener("change",function(){ soundCfg.kinds[k]=this.checked; lab.className="sndchk"+(this.checked?" on":""); saveSnd(); markSoundRows(); });
+    var sw=document.createElement("span"); sw.className="swatch"; sw.style.background=KIND[k].c;
+    var tx=document.createElement("span"); tx.textContent=KIND[k].n;
+    lab.appendChild(cb); lab.appendChild(sw); lab.appendChild(tx); box.appendChild(lab);
+  });
+}
+/* 全スケジュールで「音が鳴る種別」に🔔を付ける */
+function markSoundRows(){
+  if(!allEls) return;
+  EVENTS.forEach(function(e){ var el=allEls[e.id]; if(!el) return;
+    if(soundCfg.kinds[e.kind]) el.classList.add("snd"); else el.classList.remove("snd");
+  });
+}
+$("sndSel") && $("sndSel").addEventListener("change",function(){ soundCfg.soundId=this.value; saveSnd(); initAudio(); playTier(soundCfg.soundId,"go"); });
+$("btnSndTest") && $("btnSndTest").addEventListener("click",function(){ initAudio(); playTier(soundCfg.soundId,"go"); });
+$("btnSndCfg").addEventListener("click",function(){
+  var open=$("soundSec").style.display==="none";
+  $("soundSec").style.display=open?"block":"none"; this.className="btn"+(open?" on":"");
+  if(open) buildSoundPanel();
+});
+
+/* ══════════ 状態・毎フレーム ══════════ */
+var sim=false, simMs=0, sound=false, fired={};
+
+function computeState(t){
+  var ev0=DATA.events[0], evL=DATA.events[DATA.events.length-1];
+  if(t < EVENT_START.getTime())
+    return { phase:"pre", target:EVENT_START, from:new Date(t-1000),
+             label:"イベント開始まで", sub:ev0?fmt(ev0[1])+" — "+ev0[3]:"予定未登録", dow:dayLabel(DAYS[0]) };
+  if(t >= EVENT_END.getTime()) return { phase:"done", target:null, label:"全日程終了" };
+  for(var i=0;i<BRIEFINGS.length;i++){ var b=BRIEFINGS[i];
+    if(t>=b.start.getTime()&&t<b.endEff.getTime())
+      return { phase:"live", target:b.endEff, from:b.start, ev:b, label:"情報共有 進行中 — 残り",
+               sub:b.eLabel?b.sLabel+"–"+b.eLabel:b.sLabel, dow:dayLabel(DAYS[b.di]) };
+  }
+  for(var j=0;j<BRIEFINGS.length;j++){ if(BRIEFINGS[j].start.getTime()>t){
+    var next=BRIEFINGS[j], prev=null;
+    for(var k=j-1;k>=0;k--){ if(BRIEFINGS[k].endEff.getTime()<=t){ prev=BRIEFINGS[k]; break; } }
+    return { phase:"wait", target:next.start, from:prev?prev.endEff:EVENT_START, ev:next,
+             label:"次の情報共有まで", sub:next.eLabel?next.sLabel+"–"+next.eLabel:next.sLabel, dow:dayLabel(DAYS[next.di]) };
+  }}
+  return { phase:"tail", target:EVENT_END, from:BRIEFINGS.length?BRIEFINGS[BRIEFINGS.length-1].endEff:EVENT_START,
+           label:"最終日 終了まで", sub:(evL?fmt(evL[1]):"")+" — 終了", dow:dayLabel(DAYS[DAYS.length-1]) };
+}
+
+function tick(){
+  var clock = sim ? new Date(simMs) : new Date();
+  var t=clock.getTime(), st=computeState(t);
+
+  $("clock").innerHTML=pad(clock.getHours())+":"+pad(clock.getMinutes())+"<small>:"+pad(clock.getSeconds())+"</small>";
+  $("clockday").textContent=(sim?"SIM · ":"")+DOW[clock.getDay()]+" "+(clock.getMonth()+1)+"/"+clock.getDate();
+
+  var rem=null;
+  if(st.target){ var s=Math.max(0,Math.floor((st.target.getTime()-t)/1000));
+    rem={ d:Math.floor(s/86400), h:Math.floor((s%86400)/3600), m:Math.floor((s%3600)/60), s:s%60, total:s }; }
+
+  var alertLv=(st.phase==="wait"&&rem)?(rem.total<=60?"hot":(rem.total<=300?"warn":"")):"";
+  var cd=$("cd"), hadFlash=cd.classList.contains("flash");
+  cd.className="cd"+(st.phase==="live"?" live":"")+(st.phase==="done"?" done":"")+(alertLv?" "+alertLv:"")+(hadFlash?" flash":"");
+
+  $("cdlabel").textContent=st.label;
+  $("cdwhen").innerHTML=st.phase==="done"?"":'<span class="dow">'+st.dow+'</span>'+st.sub;
+
+  if(rem){ var txt=""; if(rem.d>0) txt+=rem.d+'<span class="u">D</span>';
+    txt+=pad(rem.h)+'<span class="u">:</span>'+pad(rem.m)+'<span class="u">:</span>'+pad(rem.s);
+    $("big").innerHTML=txt; $("big").style.color="";
+  } else { $("big").textContent="—:—:—"; $("big").style.color="var(--dim)"; }
+
+  var done=0; BRIEFINGS.forEach(function(b){ if(b.endEff.getTime()<=t) done++; });
+  $("cdtask").textContent =
+    st.phase==="done" ? "お疲れ様でした。全日程終了です。" :
+    st.phase==="pre"  ? "設営開始からタイマーが走ります。" :
+    st.phase==="tail" ? "情報共有は全て終了。片付け・終礼へ。" :
+    "情報共有 "+done+"/"+BRIEFINGS.length+" 完了 · "+(st.phase==="live"?"進行中":"待機中");
+
+  var gap=0; if(st.from&&st.target){ gap=(t-st.from.getTime())/(st.target.getTime()-st.from.getTime()); gap=Math.min(1,Math.max(0,gap)); }
+  $("gapfill").style.width=((st.phase==="done"?1:gap)*100)+"%";
+
+  var overall=Math.min(1,Math.max(0,(t-EVENT_START.getTime())/(EVENT_END.getTime()-EVENT_START.getTime())));
+  $("overall").textContent="全体進捗 "+Math.round(overall*100)+"%";
+  $("donecount").textContent=done+" / "+BRIEFINGS.length+" 完了";
+
+  DAYS.forEach(function(day,di){
+    var isToday=(clock.getFullYear()===parseDate(day.date).y && clock.getMonth()===day.mo && clock.getDate()===day.d);
+    $("lane"+di).className="lane"+(isToday?" on":"");
+    var h=headEls[di];
+    if(isToday){ var p=axisPct(clock); if(p>=0&&p<=100){ h.style.display="block"; h.style.left=p+"%"; } else h.style.display="none"; }
+    else h.style.display="none";
+  });
+  BRIEFINGS.forEach(function(b){ briefEls[b.id].className="brief"+(b.endEff.getTime()<=t?" past":""); });
+  BRIEFINGS.forEach(function(b){
+    var past=b.endEff.getTime()<=t, live=t>=b.start.getTime()&&t<b.endEff.getTime(), isNext=st.ev&&st.ev.id===b.id&&st.phase==="wait";
+    var r=rowEls[b.id]; r.row.className="row"+(past?" past":"")+(live?" now":"")+(isNext?" next":"");
+    r.st.className="rst mono "+(live?"c":isNext?"n":past?"p":""); r.st.textContent=live?"進行中":isNext?"NEXT":past?"済":"予定";
+  });
+
+  var liveEl=null,nextEl=null,lastEl=null;
+  EVENTS.forEach(function(e){
+    var el=allEls[e.id];
+    var past=e.end?e.end.getTime()<=t:e.start.getTime()<=t, live=e.end?(t>=e.start.getTime()&&t<e.end.getTime()):false;
+    el.className="arow"+(e.bracket?" br":"")+(e.kind==="brief"?" brief-row":"")+(soundCfg.kinds[e.kind]?" snd":"")+(live?" now":"")+(past&&!live?" past":"");
+    if(live&&!liveEl) liveEl=el; if(!nextEl&&e.start.getTime()>t) nextEl=el; lastEl=el;
+  });
+  followTarget=liveEl||nextEl||lastEl;
+
+  /* ③④ 汎用アラーム：チェックした種別の各予定について 5分前/1分前/開始 に鳴らす */
+  if(sound && !sim){
+    EVENTS.forEach(function(e){
+      if(!soundCfg.kinds[e.kind]) return;
+      var remain=(e.start.getTime()-t)/1000;
+      [[300,"5m"],[60,"1m"],[0,"go"]].forEach(function(mk){
+        var key=e.id+":"+mk[1];
+        // 閾値を「今まさに跨いだ」ときだけ鳴らす（読み込み時の取りこぼし/重複を防ぐ30秒窓）
+        if(remain<=mk[0] && remain>mk[0]-30 && !fired[key]){ fired[key]=true; fireAlert(mk[1], e.task); }
+      });
+    });
+  }
+  updateAudioBadge();
+  autoScroll();
+}
+
+/* ══════════ 自動追尾 ══════════ */
+var followEnabled=true, followPaused=false, resumeTimer=null, followTarget=null, lastAutoTop=-1, suppressScrollEvt=false;
+var RESUME_MS=10000, POS_RATIO=0.04, allbox=$("allbox");
+function autoScroll(){
+  if(!followEnabled||followPaused||!followTarget) return;
+  var box=allbox, target=followTarget.offsetTop-box.clientHeight*POS_RATIO;
+  var max=box.scrollHeight-box.clientHeight; target=Math.max(0,Math.min(max,target));
+  if(Math.abs(box.scrollTop-target)<1) return;
+  suppressScrollEvt=true; box.classList.add("following"); box.scrollTop=target; lastAutoTop=box.scrollTop;
+  setTimeout(function(){ suppressScrollEvt=false; },700);
+}
+function pauseFollow(){
+  if(!followEnabled) return;
+  followPaused=true; allbox.classList.remove("following"); updateFollowUI();
+  if(resumeTimer) clearTimeout(resumeTimer);
+  resumeTimer=setTimeout(function(){ followPaused=false; updateFollowUI(); autoScroll(); },RESUME_MS);
+}
+function updateFollowUI(){
+  var btn=$("btnFollow"), hint=$("followHint");
+  btn.textContent="自動追尾 "+(followEnabled?"ON":"OFF"); btn.className="btn"+(followEnabled?" on":"");
+  hint.textContent=!followEnabled?"手動スクロール":(followPaused?"手動操作中 · まもなく自動に戻ります":"現在時刻に自動追尾中");
+  hint.style.color=followPaused?"var(--signal)":"var(--dim)";
+}
+["wheel","touchstart","touchmove","keydown","mousedown"].forEach(function(ev){ allbox.addEventListener(ev,function(){ pauseFollow(); },{passive:true}); });
+allbox.addEventListener("scroll",function(){ if(suppressScrollEvt) return; if(Math.abs(allbox.scrollTop-lastAutoTop)>3) pauseFollow(); });
+$("btnFollow").addEventListener("click",function(){
+  followEnabled=!followEnabled; followPaused=false; if(resumeTimer) clearTimeout(resumeTimer);
+  if(!followEnabled) allbox.classList.remove("following"); updateFollowUI(); if(followEnabled) autoScroll();
+});
+
+/* ══════════ 編集パネル ══════════ */
+var editing=false;
+function buildEditor(){
+  $("edSubtitle").value = DATA.subtitle||"";
+  $("edTitle").value = DATA.title||"";
+  $("edTheme").value = (DATA.theme||[]).join("\n");
+  var wrap=$("editwrap"); wrap.innerHTML="";
+  var kinds=Object.keys(KIND);
+  DAYS.forEach(function(day,di){
+    var dh=document.createElement("div"); dh.className="edday";
+    dh.innerHTML='<span class="dlabel">'+day.dow+'</span>';
+    var dateIn=document.createElement("input"); dateIn.type="date"; dateIn.value=day.date; dateIn.style.width="150px";
+    dateIn.addEventListener("change",function(){ DATA.days[di].date=this.value; commit(true); });
+    var keyIn=document.createElement("input"); keyIn.type="text"; keyIn.value=day.key; keyIn.placeholder="出発/入り 等"; keyIn.style.flex="1"; keyIn.style.minWidth="120px";
+    keyIn.addEventListener("change",function(){ DATA.days[di].key=this.value; commit(false); });
+    var delDay=document.createElement("button"); delDay.className="deldy"; delDay.textContent="この日を削除"; delDay.title="この開催日と、その日の全予定を削除";
+    delDay.addEventListener("click",function(){ removeDay(di); });
+    dh.appendChild(dateIn); dh.appendChild(keyIn); dh.appendChild(delDay); wrap.appendChild(dh);
+
+    function field(cls,label,el){
+      var f=document.createElement("div"); f.className="edfield "+cls;
+      var s=document.createElement("span"); s.textContent=label;
+      f.appendChild(s); f.appendChild(el); return f;
+    }
+    DATA.events.forEach(function(ev,idx){
+      if(ev[0]!==di) return;
+      var r=document.createElement("div"); r.className="edrow"+(ev[4]==="brief"?" isbrief":"");
+      var sIn=document.createElement("input"); sIn.type="time"; sIn.value=pad2(ev[1]);
+      sIn.addEventListener("change",function(){ if(this.value){ DATA.events[idx][1]=this.value; commit(true); } });
+      var eIn=document.createElement("input"); eIn.type="time"; eIn.value=ev[2]?pad2(ev[2]):"";
+      eIn.addEventListener("change",function(){ DATA.events[idx][2]=this.value?this.value:null; commit(true); });
+      var tIn=document.createElement("input"); tIn.type="text"; tIn.value=ev[3];
+      tIn.addEventListener("change",function(){ DATA.events[idx][3]=this.value; commit(false); });
+      var kSel=document.createElement("select"); kSel.title="種別（色分け）を選ぶ";
+      kinds.forEach(function(k){ var o=document.createElement("option"); o.value=k; o.textContent=KIND[k].n; if(k===ev[4]) o.selected=true; kSel.appendChild(o); });
+      kSel.addEventListener("change",function(){ DATA.events[idx][4]=this.value; commit(true); });
+      var del=document.createElement("button"); del.className="del"; del.textContent="✕"; del.title="この行を削除";
+      del.addEventListener("click",function(){ DATA.events.splice(idx,1); commit(true); });
+      r.appendChild(field("f-start","開始",sIn));
+      r.appendChild(field("f-end","終了",eIn));
+      r.appendChild(field("f-task","内容",tIn));
+      r.appendChild(field("f-kind","種別 ▼",kSel));
+      r.appendChild(del);
+      wrap.appendChild(r);
+    });
+    var add=document.createElement("button"); add.className="edadd"; add.textContent="＋ この日に行を追加";
+    add.addEventListener("click",function(){ DATA.events.push([di,"12:00","12:15","新規の予定","brief",0]); commit(true); });
+    wrap.appendChild(add);
+  });
+}
+function commit(rebuildEditor){
+  DATA.subtitle=$("edSubtitle").value;
+  DATA.title=$("edTitle").value;
+  DATA.theme=$("edTheme").value.split("\n").map(function(s){return s.replace(/^[・\s]+/,"").trim();}).filter(function(s){return s;});
+  applyData();
+  if(rebuildEditor && editing) buildEditor();
+  saveLocal();
+}
+$("edSubtitle").addEventListener("change",function(){ commit(false); });
+$("edTitle").addEventListener("change",function(){ commit(false); });
+$("edTheme").addEventListener("change",function(){ commit(false); });
+
+/* 開催日の追加・削除（別サーキット/ラウンドへの使い回し用） */
+function removeDay(di){
+  if(DATA.days.length<=1){ alert("最低1日は必要です。"); return; }
+  if(!confirm((di+1)+"日目（"+DATA.days[di].date+"）と、その日の全予定を削除します。よろしいですか？")) return;
+  DATA.events = DATA.events.filter(function(e){ return e[0]!==di; }).map(function(e){ if(e[0]>di) e[0]=e[0]-1; return e; });
+  DATA.days.splice(di,1);
+  commit(true);
+}
+function addDay(){
+  var nd="2026-01-01";
+  if(DATA.days.length){ var last=DATA.days[DATA.days.length-1]; var d=parseDate(last.date); var dt=new Date(d.y,d.mo,d.d+1);
+    nd=dt.getFullYear()+"-"+pad(dt.getMonth()+1)+"-"+pad(dt.getDate()); }
+  DATA.days.push({date:nd, key:""});
+  commit(true);
+  $("editwrap").scrollTop=$("editwrap").scrollHeight;
+}
+$("btnAddDay").addEventListener("click",addDay);
+$("btnEdit").addEventListener("click",function(){
+  editing=!editing;
+  this.className="btn"+(editing?" on":""); this.textContent=editing?"✎ 編集を閉じる":"✎ 編集";
+  $("editorSec").style.display=editing?"block":"none";
+  if(editing) buildEditor();
+});
+
+/* 変更を焼き込んだHTMLをダウンロード */
+function sanitize(s){ return (s||"schedule").replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g,"_"); }
+$("btnExport").addEventListener("click",function(){
+  var exp=clone(DATA); exp.builtAt=new Date().toISOString().slice(0,19);
+  var json=JSON.stringify(exp,null,2);
+  var originalJSON = document.getElementById("data").textContent;
+  var out = PRISTINE_HTML.replace(originalJSON, function(){ return "\n"+json+"\n"; });
+  if(out===PRISTINE_HTML || out.indexOf('"builtAt": "'+exp.builtAt+'"')<0){
+    alert("保存に失敗しました。データブロックが見つかりませんでした。\nお手数ですが、このメッセージをご連絡ください。");
+    return;
+  }
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({builtAt:exp.builtAt, data:DATA})); }catch(e){}
+  BAKED.builtAt=exp.builtAt;
+  var fname=sanitize(DATA.title)+"_情報共有タイマー.html";
+  var blob=new Blob([out],{type:"text/html;charset=utf-8"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=fname; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  var ok=$("exportOK");
+  ok.textContent="✓ 「"+fname+"」をダウンロードしました。次回はそのファイルを開いてください。";
+  ok.style.display="block";
+  clearTimeout($("btnExport")._t); $("btnExport")._t=setTimeout(function(){ ok.style.display="none"; },9000);
+});
+$("btnReset").addEventListener("click",function(){
+  if(!confirm("編集内容を破棄して、ファイルに焼き込まれた初期スケジュールに戻します。よろしいですか？")) return;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  DATA=clone(JSON.parse($("data").textContent));
+  applyData(); if(editing) buildEditor();
+});
+
+/* ══════════ 操作 ══════════ */
+$("btnSound").addEventListener("click",function(){
+  sound=!sound; this.textContent="アラート音 "+(sound?"ON":"OFF"); this.className="btn"+(sound?" on":"");
+  initAudio(); if(sound) playTier(soundCfg.soundId,"go");
+});
+$("btnTest").addEventListener("click",function(){ initAudio(); fireAlert("go","テスト"); });
+$("btnSim").addEventListener("click",function(){
+  sim=!sim; this.textContent="時刻シミュレーション "+(sim?"ON":"OFF"); this.className="btn"+(sim?" on":"");
+  $("slider").style.display=sim?"block":"none"; $("hint").style.display=sim?"none":"inline";
+  if(sim){ simMs=EVENT_START.getTime(); syncSlider(); $("slider").value=simMs; } tick();
+});
+var sl=$("slider");
+function syncSlider(){ sl.min=EVENT_START.getTime()-3600000; sl.max=EVENT_END.getTime()+600000; sl.step=60000; }
+sl.addEventListener("input",function(){ simMs=+this.value; tick(); });
+
+/* ── 起動 ── */
+applyData();
+updateFollowUI();
+updateAudioBadge();
+syncSlider();
+simMs=EVENT_START.getTime();
+tick();
+setInterval(tick,250);
+setInterval(function(){ if(actx&&actx.state==="suspended"&&!document.hidden) actx.resume().catch(function(){}); },20000);
+</script>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+  /* ===== ログイン設定（変更する場合はこの2行だけ書き換えてください） ===== */
+  var LOGIN_ID   = "ogw";
+  var LOGIN_PASS = "suzuka1122";
+  /* ====================================================================== */
+  var AUTH_KEY="ogwAuth::SF-R11-12-SUZUKA";
+  function authed(){ try{ return localStorage.getItem(AUTH_KEY)==="1"; }catch(e){ return false; } }
+  function hideLogin(){ $("loginOverlay").style.display="none"; }
+  function showLogin(){ $("loginOverlay").style.display="flex"; var i=$("loginId"); if(i) i.focus(); }
+  if(authed()) hideLogin(); else showLogin();
+  function doLogin(){
+    var id=($("loginId").value||"").trim(), pw=$("loginPass").value||"";
+    if(id===LOGIN_ID && pw===LOGIN_PASS){
+      try{ localStorage.setItem(AUTH_KEY,"1"); }catch(e){}
+      $("loginErr").textContent=""; $("loginPass").value=""; hideLogin();
+      if(window.initAudio) window.initAudio();
+    } else { $("loginErr").textContent="IDまたはパスワードが違います"; }
+  }
+  $("loginBtn").addEventListener("click",doLogin);
+  $("loginPass").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+  $("loginId").addEventListener("keydown",function(e){ if(e.key==="Enter"){ $("loginPass").focus(); } });
+  if($("btnLogout")) $("btnLogout").addEventListener("click",function(){
+    if(!confirm("ログアウトします。次回はまたID・パスワードが必要です。よろしいですか？")) return;
+    try{ localStorage.removeItem(AUTH_KEY); }catch(e){} showLogin();
+  });
+
+  /* 画面スリープ防止（Wake Lock） */
+  var wl=null, won=false;
+  async function reqWake(){ try{ if(navigator.wakeLock){ wl=await navigator.wakeLock.request("screen"); } }catch(e){} }
+  if($("btnWake")){
+    $("btnWake").addEventListener("click",async function(){
+      won=!won; this.textContent="📱 画面ON維持 "+(won?"ON":"OFF"); this.className="btn"+(won?" on":"");
+      if(won){ await reqWake(); } else if(wl){ try{ await wl.release(); }catch(e){} wl=null; }
+    });
+    document.addEventListener("visibilitychange",function(){ if(won && !document.hidden && !wl) reqWake(); });
+  }
+
+  /* Service Worker（PWA / オフライン） */
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
