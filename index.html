@@ -884,42 +884,55 @@ $("btnSndCfg").addEventListener("click",function(){
 /* ══════════ ネット時刻同期（全端末の時計ズレをなくす）══════════
    各端末のローカル時計ではなく、ネット上の標準時刻との差（オフセット）を補正して
    「真の時刻」を使う。精度は±1秒程度（スケジュール用途に十分）。オフライン時は端末時計にフォールバック。 */
-var timeOffset=0, timeSynced=false, lastSyncMs=0;
-try{ var ofs=localStorage.getItem("ogwTimeOffset"); if(ofs!==null){ timeOffset=parseInt(ofs,10)||0; } }catch(e){}
+var timeOffset=0, timeSynced=false, lastSyncMs=0, syncState="pending", syncing=false;
+try{ var ofs=localStorage.getItem("ogwTimeOffset"); if(ofs!==null){ timeOffset=parseInt(ofs,10)||0; if(timeOffset) syncState="cached"; } }catch(e){}
 function nowMs(){ return Date.now()+timeOffset; }   // 補正後の現在時刻(ms)
 function updateSyncBadge(){
   var b=$("syncBadge"); if(!b) return;
-  if(timeSynced){
-    var s=Math.round(timeOffset/1000);
-    b.textContent="🌐 ネット時刻 同期済み"+(Math.abs(s)>=1?"（端末時計を"+(s>0?"+":"")+s+"秒補正）":"");
-    b.style.color="var(--check)";
-  } else { b.textContent="⏱ 端末時計（同期待ち）"; b.style.color="var(--dim)"; }
+  b.style.cursor="pointer"; b.title="クリックで今すぐ再同期";
+  var s=Math.round(timeOffset/1000), adj=(Math.abs(s)>=1?"（端末時計を"+(s>0?"+":"")+s+"秒補正）":"（ズレなし）");
+  if(syncState==="ok"){ b.textContent="🌐 ネット時刻 同期済み"+adj; b.style.color="var(--check)"; }
+  else if(syncState==="cached"){ b.textContent="🌐 前回の同期値で補正中"+adj+" ／ 再同期中…"; b.style.color="var(--check)"; }
+  else if(syncState==="syncing"){ b.textContent="⏱ ネット時刻に同期中…"; b.style.color="var(--dim)"; }
+  else if(syncState==="fail"){ b.textContent="⚠ ネット同期できず・端末時計で動作（クリックで再試行）"; b.style.color="var(--signal)"; }
+  else { b.textContent="⏱ 端末時計（同期待ち）"; b.style.color="var(--dim)"; }
 }
 function applyOffset(serverMs, t0, t1){
   var est=serverMs + (t1-t0)/2;           // 往復の半分を足して受信時点に合わせる
   timeOffset = Math.round(est - t1);
-  timeSynced=true; lastSyncMs=Date.now();
+  timeSynced=true; syncState="ok"; lastSyncMs=Date.now(); syncing=false;
   try{ localStorage.setItem("ogwTimeOffset", String(timeOffset)); }catch(e){}
   updateSyncBadge();
 }
+// 複数の時刻ソースを順に試す（file://のPCでも確実に同期できるように）
 function syncTime(){
-  // 1) 同一オリジンのHTTP Dateヘッダ（配信サーバ=GitHub等のNTP同期時刻。TZ非依存で確実）
+  if(syncing) return; syncing=true;
+  if(syncState!=="ok" && syncState!=="cached") syncState="syncing";
+  updateSyncBadge();
+  var sources=[];
+  // 1) 同一オリジンのHTTP Dateヘッダ（配信サーバのNTP時刻。https配信のアプリ版で最も確実）
   if(location.protocol==="http:"||location.protocol==="https:"){
-    var t0=Date.now();
-    fetch(location.href,{method:"HEAD",cache:"no-store"}).then(function(r){
-      var t1=Date.now(), d=r.headers.get("date"); if(!d) throw 0;
-      var ms=new Date(d).getTime(); if(isNaN(ms)) throw 0; applyOffset(ms,t0,t1);
-    }).catch(function(){ syncViaApi(); });
-  } else { syncViaApi(); }   // file://（PCでファイル直開き）等はAPIへ
-}
-function syncViaApi(){
-  // 2) フォールバック：CORS対応の時刻API（UTC絶対時刻）
-  var t0=Date.now();
-  fetch("https://worldtimeapi.org/api/timezone/Etc/UTC",{cache:"no-store"})
-   .then(function(r){ return r.json(); })
-   .then(function(j){ var t1=Date.now(); var ms = j.unixtime ? j.unixtime*1000 : new Date(j.utc_datetime).getTime();
-      if(isNaN(ms)) throw 0; applyOffset(ms,t0,t1); })
-   .catch(function(){ /* オフライン等：端末時計のまま */ if(!timeSynced) updateSyncBadge(); });
+    sources.push({ head:true, url:location.href });
+  }
+  // 2) CORS対応の公開時刻API（UTC絶対時刻。file://のPC版はこちら）
+  sources.push({ url:"https://timeapi.io/api/time/current/zone?timeZone=UTC",
+    parse:function(j){ return Date.UTC(j.year,(j.month-1),j.day,j.hour,j.minute,j.seconds||0,j.milliSeconds||0); } });
+  sources.push({ url:"https://worldtimeapi.org/api/timezone/Etc/UTC",
+    parse:function(j){ return j.unixtime ? j.unixtime*1000 : new Date(j.utc_datetime).getTime(); } });
+  sources.push({ url:"https://www.timeapi.io/api/time/current/zone?timeZone=UTC",
+    parse:function(j){ return Date.UTC(j.year,(j.month-1),j.day,j.hour,j.minute,j.seconds||0,j.milliSeconds||0); } });
+
+  (function tryOne(i){
+    if(i>=sources.length){ syncing=false; if(!timeSynced){ syncState="fail"; } else { syncState="ok"; } updateSyncBadge(); return; }
+    var s=sources[i], t0=Date.now();
+    var opt = s.head ? {method:"HEAD",cache:"no-store"} : {cache:"no-store"};
+    fetch(s.url,opt).then(function(r){
+      if(!r.ok && !s.head) throw 0;
+      var t1=Date.now();
+      if(s.head){ var d=r.headers.get("date"); if(!d) throw 0; var ms=new Date(d).getTime(); if(isNaN(ms)) throw 0; applyOffset(ms,t0,t1); }
+      else { return r.json().then(function(j){ var t2=Date.now(); var ms=s.parse(j); if(isNaN(ms)) throw 0; applyOffset(ms,t0,t2); }); }
+    }).catch(function(){ tryOne(i+1); });
+  })(0);
 }
 
 /* ══════════ 状態・毎フレーム ══════════ */
@@ -1201,10 +1214,11 @@ tick();
 setInterval(tick,250);
 setInterval(function(){ if(actx&&actx.state==="suspended"&&!document.hidden) actx.resume().catch(function(){}); },20000);
 
-/* ネット時刻同期：起動時＋5分ごと＋復帰時に再同期 */
+/* ネット時刻同期：起動時＋5分ごと＋復帰時＋バッジクリックで再同期 */
 syncTime();
 setInterval(syncTime, 5*60*1000);
 document.addEventListener("visibilitychange",function(){ if(!document.hidden && Date.now()-lastSyncMs>60000) syncTime(); });
+$("syncBadge") && $("syncBadge").addEventListener("click",function(){ syncTime(); });
 </script>
 
 <script>
