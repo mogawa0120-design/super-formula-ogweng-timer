@@ -431,6 +431,7 @@ textarea:focus{outline:none;border-color:var(--signal);}
       <div class="clockbox">
         <div class="clocknum mono" id="clock">--:--<small>:--</small></div>
         <div class="clockday mono" id="clockday">—</div>
+        <div class="clockday mono" id="syncBadge" style="margin-top:3px;">⏱ 端末時計</div>
       </div>
     </div>
     <div class="cd" id="cd">
@@ -482,11 +483,20 @@ textarea:focus{outline:none;border-color:var(--signal);}
           <option value="until">開始まで鳴らし続ける</option>
         </select>
       </div>
-      <div class="sndnote">
-        下で<b>チェックを入れた種別</b>について、各予定の <b>5分前・1分前・開始</b> にアラーム音が鳴ります（上部「アラート音 ON」が必要）。<br>
-        <b>鳴らす長さ</b>で、1回だけ／数秒間／開始まで鳴らし続ける を選べます。「開始まで」は 5分前・1分前のアラームが予定の開始時刻まで鳴り続けます。<br>
-        鳴っている音は、上部の「<b>🔕 鳴っている音を止める</b>」でいつでも止められます。
+      <div class="sndrow">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--txt);">
+          <input type="checkbox" id="sndVibe" style="width:18px;height:18px;accent-color:var(--check);cursor:pointer;">
+          バイブも連動させる
+        </label>
+        <span style="font-size:10px;color:var(--dim);">（Android対応。iPhone/iPadはブラウザ仕様で振動非対応）</span>
       </div>
+      <div class="sndnote">
+        下で<b>チェックを入れた種別</b>について、各予定の <b>5分前・1分前・開始</b> にアラーム音（＋バイブ）が鳴ります（上部「アラート音 ON」が必要）。<br>
+        <b>鳴らす長さ</b>で、1回だけ／数秒間／開始まで鳴らし続ける を選べます。「開始まで」は 5分前・1分前のアラームが予定の開始時刻まで鳴り続けます。<br>
+        鳴っている音は、上部の「<b>🔕 鳴っている音を止める</b>」でいつでも止められます。<br>
+        <b>Android の音量について：</b>この音は端末の「<b>音楽・動画・ゲーム（メディア）</b>」の音量で鳴ります（Webアプリは「通知」音量を使えません）。小さいときはメディアの音量を上げてください。
+      </div>
+      <div class="sndchecks" id="sndChecks"></div>
       <div class="sndchecks" id="sndChecks"></div>
     </div>
 
@@ -558,9 +568,12 @@ textarea:focus{outline:none;border-color:var(--signal);}
         <div class="guidebody">
           <div class="gi"><span>🔢</span><div><b>上段の大きな数字</b>＝次の「情報共有」までの残り時間。進行中は緑になり、残り時間を表示します。</div></div>
           <div class="gi"><span>📜</span><div><b>下段「全スケジュール」</b>＝現在の予定が一番上に来るよう自動で流れます。指でスクロールすると一時停止し、約10秒後に自動で戻ります（「自動追尾 OFF」で固定も可）。</div></div>
+          <div class="gi"><span>🌐</span><div><b>時刻は自動でネット標準時刻に同期</b>します（右上「🌐 ネット時刻 同期済み」）。端末の時計が多少ズレていても<b>全端末で同じ基準時刻</b>でカウント。圏外時は端末時計で動作します。</div></div>
           <div class="gi"><span>🔔</span><div><b>アラート音 ON</b>にすると、設定した種別の <b>5分前・1分前・開始</b> に音が鳴ります（🔔印の予定が対象）。</div></div>
-          <div class="gi"><span>🔊</span><div><b>音設定</b>＝鳴らす種別（情報共有・走行など）／アラーム音の種類／鳴らす長さ を変えられます。鳴っている音は「🔕 止める」で停止。</div></div>
-          <div class="gi"><span>▶️</span><div><b>最初に画面を1回タップ</b>して「音声：準備OK」にしてください（端末の仕様。iPhoneは本体の<b>消音スイッチをOFF</b>）。「♪ アラーム音テスト」で確認できます。</div></div>
+          <div class="gi"><span>🔊</span><div><b>音設定</b>＝鳴らす種別（情報共有・走行など）／アラーム音の種類／鳴らす長さ／<b>バイブ連動</b> を変えられます。鳴っている音は「🔕 止める」で停止。</div></div>
+          <div class="gi"><span>📳</span><div><b>バイブ連動</b>＝音に合わせて振動します（<b>Androidのみ</b>。iPhone/iPadはブラウザ仕様で振動非対応）。</div></div>
+          <div class="gi"><span>🔈</span><div><b>音量</b>＝<b>Android</b>は「<b>音楽・動画・ゲーム（メディア）</b>」の音量で鳴ります（「通知」音量は使えません）。<b>iPhone</b>は本体の<b>消音スイッチをOFF</b>に。</div></div>
+          <div class="gi"><span>▶️</span><div><b>最初に画面を1回タップ</b>して「音声：準備OK」にしてください。「♪ アラーム音テスト」で音・振動を確認できます。</div></div>
           <div class="gi guide-m"><span>📱</span><div><b>（スマホ版）画面ON維持</b>＝走行中など画面を消したくないときにON。</div></div>
           <div class="gi guide-m"><span>🔑</span><div><b>（スマホ版）</b>ログインは関係者のみ。一度ログインすればこの端末では次回から省略されます。</div></div>
           <div class="gi"><span>✎</span><div><b>編集</b>＝担当者向け。時刻・内容の修正や、別大会への作り替えができます（通常は触らなくてOK）。</div></div>
@@ -746,12 +759,13 @@ function sndById(id){ for(var i=0;i<SOUNDS.length;i++) if(SOUNDS[i].id===id) ret
 
 /* ── 音設定（③ 種別チェック ＋ ④ 選択音）localStorageに保存 ── */
 var SND_KEY = LS_KEY + "::snd";
-var soundCfg = { soundId:"beep", duration:"5", kinds:{brief:true,run:false,map:false,check:false,flag:false,media:false,admin:false} };
+var soundCfg = { soundId:"beep", duration:"5", vibrate:true, kinds:{brief:true,run:false,map:false,check:false,flag:false,media:false,admin:false} };
 try{
   var sr=localStorage.getItem(SND_KEY);
   if(sr){ var so=JSON.parse(sr);
     if(so){ if(so.soundId) soundCfg.soundId=so.soundId;
             if(so.duration) soundCfg.duration=so.duration;
+            if(typeof so.vibrate==="boolean") soundCfg.vibrate=so.vibrate;
             if(so.kinds){ for(var kk in soundCfg.kinds){ if(so.kinds.hasOwnProperty(kk)) soundCfg.kinds[kk]=!!so.kinds[kk]; } } } }
 }catch(e){}
 function saveSnd(){ try{ localStorage.setItem(SND_KEY, JSON.stringify(soundCfg)); }catch(e){} }
@@ -784,33 +798,37 @@ function playTier(soundId, tier){
 var ring=null;                 // 継続再生の管理
 var RING_GAP=1300;             // パターンを繰り返す間隔(ms)
 function showStop(on){ var b=$("btnStop"); if(b) b.style.display=on?"":"none"; }
-function stopRing(){ if(ring){ clearInterval(ring.iv); clearTimeout(ring.iv); if(ring.t2) clearTimeout(ring.t2); ring=null; } showStop(false); }
+function stopRing(){ if(ring){ clearInterval(ring.iv); clearTimeout(ring.iv); if(ring.t2) clearTimeout(ring.t2); ring=null; } try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){} showStop(false); }
 // durからこのアラームの終了時刻(ms)を決める。startMs=その予定の開始時刻
 function ringEnd(tier, startMs){
   var d=soundCfg.duration;
   if(d==="once") return 0;                               // 1回だけ
-  if(d==="until"){ return (tier==="go") ? Date.now()+10000 : (startMs||Date.now()+10000); } // 開始まで（goは10秒）
-  var sec=parseInt(d,10)||5; return Date.now()+sec*1000; // 数秒間
+  if(d==="until"){ return (tier==="go") ? nowMs()+10000 : (startMs||nowMs()+10000); } // 開始まで（goは10秒）
+  var sec=parseInt(d,10)||5; return nowMs()+sec*1000; // 数秒間
+}
+/* バイブ（Androidのみ有効。iPhone/iPadはブラウザ非対応で何も起きない） */
+function doVibe(tier){
+  if(!soundCfg.vibrate) return;
+  try{ if(navigator.vibrate) navigator.vibrate(tier==="go"?[200,80,200]:[300]); }catch(e){}
 }
 function fireAlert(tier, label, startMs){
   stopRing();
-  // 視覚・バイブは1回
+  // 視覚フラッシュは1回
   var cd=$("cd"); cd.classList.remove("flash"); void cd.offsetWidth; cd.classList.add("flash");
-  try{ if(navigator.vibrate) navigator.vibrate(tier==="go"?[200,80,200]:[120]); }catch(e){}
   flashTitle(tier==="go" ? "▶ "+(label||"開始")+"！" : (tier==="5m"?"⏰ 5分前":"⏰ 1分前"));
-  // 音は継続時間ぶん繰り返す
-  playTier(soundCfg.soundId, tier);
+  // 音＋バイブを継続時間ぶん繰り返す（音に連動して振動）
+  playTier(soundCfg.soundId, tier); doVibe(tier);
   var endMs=ringEnd(tier, startMs);
-  if(!endMs || endMs<=Date.now()+300){ // 1回だけ：少し経ったら停止ボタンを隠す
+  if(!endMs || endMs<=nowMs()+300){ // 1回だけ：少し経ったら停止ボタンを隠す
     showStop(true);
     ring={ iv:setTimeout(function(){ stopRing(); }, 1600) };
     return;
   }
   showStop(true);
-  var t2=setTimeout(function(){ stopRing(); }, Math.max(300, endMs-Date.now())+150); // 終了時刻ちょうどで停止
+  var t2=setTimeout(function(){ stopRing(); }, Math.max(300, endMs-nowMs())+150); // 終了時刻ちょうどで停止
   ring={ t2:t2, iv:setInterval(function(){
-    if(Date.now()>=endMs){ stopRing(); return; }
-    playTier(soundCfg.soundId, tier);
+    if(nowMs()>=endMs){ stopRing(); return; }
+    playTier(soundCfg.soundId, tier); doVibe(tier);
   }, RING_GAP) };
 }
 var titleTimer=null;
@@ -834,6 +852,7 @@ function buildSoundPanel(){
   var sel=$("sndSel"); sel.innerHTML="";
   SOUNDS.forEach(function(s){ var o=document.createElement("option"); o.value=s.id; o.textContent=s.name; if(s.id===soundCfg.soundId)o.selected=true; sel.appendChild(o); });
   $("sndDur").value = soundCfg.duration;   // 鳴らす長さの現在値を反映
+  if($("sndVibe")) $("sndVibe").checked = !!soundCfg.vibrate;   // バイブ連動の現在値
   var box=$("sndChecks"); box.innerHTML="";
   Object.keys(KIND).forEach(function(k){
     var lab=document.createElement("label"); lab.className="sndchk"+(soundCfg.kinds[k]?" on":"");
@@ -853,6 +872,7 @@ function markSoundRows(){
 }
 $("sndSel") && $("sndSel").addEventListener("change",function(){ soundCfg.soundId=this.value; saveSnd(); initAudio(); playTier(soundCfg.soundId,"go"); });
 $("sndDur") && $("sndDur").addEventListener("change",function(){ soundCfg.duration=this.value; saveSnd(); });
+$("sndVibe") && $("sndVibe").addEventListener("change",function(){ soundCfg.vibrate=this.checked; saveSnd(); if(this.checked) doVibe("go"); }); // ONにしたら試しに1回振動
 $("btnSndTest") && $("btnSndTest").addEventListener("click",function(){ initAudio(); fireAlert("go","テスト",null); }); // 鳴らす長さを反映して試聴
 $("btnStop") && $("btnStop").addEventListener("click",function(){ stopRing(); });
 $("btnSndCfg").addEventListener("click",function(){
@@ -860,6 +880,47 @@ $("btnSndCfg").addEventListener("click",function(){
   $("soundSec").style.display=open?"block":"none"; this.className="btn"+(open?" on":"");
   if(open) buildSoundPanel();
 });
+
+/* ══════════ ネット時刻同期（全端末の時計ズレをなくす）══════════
+   各端末のローカル時計ではなく、ネット上の標準時刻との差（オフセット）を補正して
+   「真の時刻」を使う。精度は±1秒程度（スケジュール用途に十分）。オフライン時は端末時計にフォールバック。 */
+var timeOffset=0, timeSynced=false, lastSyncMs=0;
+try{ var ofs=localStorage.getItem("ogwTimeOffset"); if(ofs!==null){ timeOffset=parseInt(ofs,10)||0; } }catch(e){}
+function nowMs(){ return Date.now()+timeOffset; }   // 補正後の現在時刻(ms)
+function updateSyncBadge(){
+  var b=$("syncBadge"); if(!b) return;
+  if(timeSynced){
+    var s=Math.round(timeOffset/1000);
+    b.textContent="🌐 ネット時刻 同期済み"+(Math.abs(s)>=1?"（端末時計を"+(s>0?"+":"")+s+"秒補正）":"");
+    b.style.color="var(--check)";
+  } else { b.textContent="⏱ 端末時計（同期待ち）"; b.style.color="var(--dim)"; }
+}
+function applyOffset(serverMs, t0, t1){
+  var est=serverMs + (t1-t0)/2;           // 往復の半分を足して受信時点に合わせる
+  timeOffset = Math.round(est - t1);
+  timeSynced=true; lastSyncMs=Date.now();
+  try{ localStorage.setItem("ogwTimeOffset", String(timeOffset)); }catch(e){}
+  updateSyncBadge();
+}
+function syncTime(){
+  // 1) 同一オリジンのHTTP Dateヘッダ（配信サーバ=GitHub等のNTP同期時刻。TZ非依存で確実）
+  if(location.protocol==="http:"||location.protocol==="https:"){
+    var t0=Date.now();
+    fetch(location.href,{method:"HEAD",cache:"no-store"}).then(function(r){
+      var t1=Date.now(), d=r.headers.get("date"); if(!d) throw 0;
+      var ms=new Date(d).getTime(); if(isNaN(ms)) throw 0; applyOffset(ms,t0,t1);
+    }).catch(function(){ syncViaApi(); });
+  } else { syncViaApi(); }   // file://（PCでファイル直開き）等はAPIへ
+}
+function syncViaApi(){
+  // 2) フォールバック：CORS対応の時刻API（UTC絶対時刻）
+  var t0=Date.now();
+  fetch("https://worldtimeapi.org/api/timezone/Etc/UTC",{cache:"no-store"})
+   .then(function(r){ return r.json(); })
+   .then(function(j){ var t1=Date.now(); var ms = j.unixtime ? j.unixtime*1000 : new Date(j.utc_datetime).getTime();
+      if(isNaN(ms)) throw 0; applyOffset(ms,t0,t1); })
+   .catch(function(){ /* オフライン等：端末時計のまま */ if(!timeSynced) updateSyncBadge(); });
+}
 
 /* ══════════ 状態・毎フレーム ══════════ */
 var sim=false, simMs=0, sound=false, fired={};
@@ -886,7 +947,7 @@ function computeState(t){
 }
 
 function tick(){
-  var clock = sim ? new Date(simMs) : new Date();
+  var clock = sim ? new Date(simMs) : new Date(nowMs());
   var t=clock.getTime(), st=computeState(t);
 
   $("clock").innerHTML=pad(clock.getHours())+":"+pad(clock.getMinutes())+"<small>:"+pad(clock.getSeconds())+"</small>";
@@ -1133,11 +1194,17 @@ sl.addEventListener("input",function(){ simMs=+this.value; tick(); });
 applyData();
 updateFollowUI();
 updateAudioBadge();
+updateSyncBadge();
 syncSlider();
 simMs=EVENT_START.getTime();
 tick();
 setInterval(tick,250);
 setInterval(function(){ if(actx&&actx.state==="suspended"&&!document.hidden) actx.resume().catch(function(){}); },20000);
+
+/* ネット時刻同期：起動時＋5分ごと＋復帰時に再同期 */
+syncTime();
+setInterval(syncTime, 5*60*1000);
+document.addEventListener("visibilitychange",function(){ if(!document.hidden && Date.now()-lastSyncMs>60000) syncTime(); });
 </script>
 
 <script>
