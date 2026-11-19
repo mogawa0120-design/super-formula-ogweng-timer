@@ -1,6 +1,6 @@
 /* 鈴鹿 情報共有タイマー — Service Worker
    アプリ本体を差し替えたら、下の数字を v2, v3… と上げてください（各端末が最新版を取得します）。 */
-const VERSION = 'suzuka-r11-12-v1';
+const VERSION = 'suzuka-r11-12-v4';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
