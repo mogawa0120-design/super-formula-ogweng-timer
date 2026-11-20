@@ -62,6 +62,7 @@ body{
 .cdright{padding:10px 24px 10px 0;text-align:right;}
 .big{font-size:clamp(46px,8.5vw,88px);font-weight:700;line-height:.9;letter-spacing:-.02em;white-space:nowrap;}
 .big .u{font-size:.28em;color:var(--dim);margin:0 5px;letter-spacing:.1em;}
+.big .dg,.clocknum .dg{display:inline-block;width:.62em;text-align:center;}
 .cd.warn .big{color:var(--signal);}
 .cd.hot .big{color:var(--hot);animation:pulse 1s steps(2,end) infinite;}
 .cd.flash{animation:flash .5s ease-out 3;}
@@ -593,6 +594,7 @@ var PRISTINE_HTML = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
 
 function $(id){ return document.getElementById(id); }
 function pad(n){ return (n<10?"0":"")+n; }
+function dcell(s){ s=String(s); var o=""; for(var i=0;i<s.length;i++) o+='<span class="dg">'+s[i]+'</span>'; return o; }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function fmt(hm){ if(!hm) return ""; var p=hm.split(":"); return parseInt(p[0],10)+":"+p[1]; }
 function pad2(hm){ if(!hm) return ""; var p=hm.split(":"); return pad(parseInt(p[0],10))+":"+pad(parseInt(p[1]||"0",10)); }
@@ -963,7 +965,7 @@ function tick(){
   var clock = sim ? new Date(simMs) : new Date(nowMs());
   var t=clock.getTime(), st=computeState(t);
 
-  $("clock").innerHTML=pad(clock.getHours())+":"+pad(clock.getMinutes())+"<small>:"+pad(clock.getSeconds())+"</small>";
+  $("clock").innerHTML=dcell(pad(clock.getHours()))+":"+dcell(pad(clock.getMinutes()))+"<small>:"+dcell(pad(clock.getSeconds()))+"</small>";
   $("clockday").textContent=(sim?"SIM · ":"")+DOW[clock.getDay()]+" "+(clock.getMonth()+1)+"/"+clock.getDate();
 
   var rem=null;
@@ -977,8 +979,8 @@ function tick(){
   $("cdlabel").textContent=st.label;
   $("cdwhen").innerHTML=st.phase==="done"?"":'<span class="dow">'+st.dow+'</span>'+st.sub;
 
-  if(rem){ var txt=""; if(rem.d>0) txt+=rem.d+'<span class="u">D</span>';
-    txt+=pad(rem.h)+'<span class="u">:</span>'+pad(rem.m)+'<span class="u">:</span>'+pad(rem.s);
+  if(rem){ var txt=""; if(rem.d>0) txt+=dcell(rem.d)+'<span class="u">D</span>';
+    txt+=dcell(pad(rem.h))+'<span class="u">:</span>'+dcell(pad(rem.m))+'<span class="u">:</span>'+dcell(pad(rem.s));
     $("big").innerHTML=txt; $("big").style.color="";
   } else { $("big").textContent="—:—:—"; $("big").style.color="var(--dim)"; }
 
@@ -1003,10 +1005,19 @@ function tick(){
     if(isToday){ var p=axisPct(clock); if(p>=0&&p<=100){ h.style.display="block"; h.style.left=p+"%"; } else h.style.display="none"; }
     else h.style.display="none";
   });
-  BRIEFINGS.forEach(function(b){ briefEls[b.id].className="brief"+(b.endEff.getTime()<=t?" past":""); });
+  var dayAllPast={};
+  BRIEFINGS.forEach(function(b){
+    var bpast=b.endEff.getTime()<=t;
+    briefEls[b.id].className="brief"+(bpast?" past":"");
+    briefEls[b.id].style.display=bpast?"none":"";          // 終了した情報共有バーは非表示
+    if(dayAllPast[b.di]===undefined) dayAllPast[b.di]=true;
+    if(!bpast) dayAllPast[b.di]=false;
+  });
+  DAYS.forEach(function(day,di){ var ln=$("lane"+di); if(ln) ln.style.display=(dayAllPast[di]?"none":""); }); // 全予定終了の日はレーンごと非表示
   BRIEFINGS.forEach(function(b){
     var past=b.endEff.getTime()<=t, live=t>=b.start.getTime()&&t<b.endEff.getTime(), isNext=st.ev&&st.ev.id===b.id&&st.phase==="wait";
     var r=rowEls[b.id]; r.row.className="row"+(past?" past":"")+(live?" now":"")+(isNext?" next":"");
+    r.row.style.display=past?"none":"";                    // 終了した情報共有はリストから消す
     r.st.className="rst mono "+(live?"c":isNext?"n":past?"p":""); r.st.textContent=live?"進行中":isNext?"NEXT":past?"済":"予定";
   });
 
